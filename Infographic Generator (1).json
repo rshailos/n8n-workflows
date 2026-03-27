@@ -1,0 +1,177 @@
+{
+  "name": "Infographic Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Infographic creator",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "What is the YT video link?",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "dc196163-4af2-43ed-add2-9219448c86a2",
+      "name": "On form submission",
+      "webhookId": "57e87c2b-c69e-4b18-bb62-06321c495aaf"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/pintostudio~youtube-transcript-scraper/run-sync-get-dataset-items?token=apify_api_7cMxMCzxpWL8vhmqb51QdwT5E1xuBX2LVU4f",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "videoUrl",
+              "value": "={{ $json['What is the YT video link?'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "bf46d31d-736b-4378-8680-e2d4dbd24514",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "tZquImmyYH1nW0Ls",
+          "name": "Query Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "=Create a sketchnote whiteboard infographic based on this summary:\n\n{{ $json.output[0].content[0].text }}\n\nVisual style: Hand-drawn marker on whiteboard, bento-box grid layout, 4-6 panels each with colored header and bullet points, cobalt blue/emerald green/sunset orange/deep purple accents, 16:9 format.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        0
+      ],
+      "id": "368dc7bf-32bd-4af1-9e1f-5a22f4e7fa4b",
+      "name": "Generate an image1",
+      "credentials": {
+        "openAiApi": {
+          "id": "qOUgwgQY34M5Kqsw",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Summarize this video transcript into a concise 300-word sketchnote brief covering: main thesis, 4-6 key mental models/arguments, and conclusion. Keep it structured and clear.\n\nTranscript: {{ $json.data.map(x => x.text).join(' ') }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "8fbe5d75-f7c5-4d86-aadf-8c9b031dd474",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "qOUgwgQY34M5Kqsw",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image1": {
+      "main": [
+        []
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Generate an image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0b9611e5-7853-48e3-85cc-a3c7c6f5fa67",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7aaf33690ddcbaba171dbaba152bd2236f047a6736bf319890604e19772133eb"
+  },
+  "id": "G0NPlPOcBcE104DY",
+  "tags": []
+}
